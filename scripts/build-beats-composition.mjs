@@ -286,15 +286,21 @@ function stageCjkSubset() {
   fs.mkdirSync(path.dirname(textFile), { recursive: true });
   fs.mkdirSync(path.dirname(output), { recursive: true });
   fs.writeFileSync(textFile, text);
-  run("pyftsubset", [
-    source,
-    "--font-number=0",
-    `--text-file=${textFile}`,
-    "--flavor=woff2",
-    `--output-file=${output}`,
-    "--layout-features=*",
-    "--no-hinting"
-  ], { capture: true });
+  try {
+    run("pyftsubset", [
+      source,
+      "--font-number=0",
+      `--text-file=${textFile}`,
+      "--flavor=woff2",
+      `--output-file=${output}`,
+      "--layout-features=*",
+      "--no-hinting"
+    ], { capture: true });
+  } catch (error) {
+    // 半装状态(如缺 Brotli 扩展)不阻断出片：pip install "fonttools[woff]" 可补齐。
+    console.warn(`WARN 中文字体子集化失败,回退系统字体: ${String(error.message).split("\n")[0]}`);
+    return false;
+  }
   return true;
 }
 
