@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { ROOT, jobDir, readJsonSafe } from "./jobs.mjs";
-import { npmCmd } from "../scripts/lib.mjs";
+import { npmCmd, spawnShellFix } from "../scripts/lib.mjs";
 
 const LOG_DIR = path.join(ROOT, "console", "logs");
 fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -157,10 +157,11 @@ function nextStep(run) {
   const step = run.steps[run.stepIndex];
   emit(run, "step", { index: run.stepIndex, total: run.steps.length, name: step.name });
   append(run, `\n===== [${run.stepIndex + 1}/${run.steps.length}] ${step.name} =====\n$ ${step.cmd} ${step.args.join(" ")}\n`);
-  const child = spawn(step.cmd, step.args, {
+  const [cmd, argv, opts] = spawnShellFix(step.cmd, step.args, {
     cwd: step.cwd,
     env: { ...process.env, FORCE_COLOR: "0", PRODUCER_BROWSER_GPU_MODE: "hardware" }
   });
+  const child = spawn(cmd, argv, opts);
   run.child = child;
   child.stdout.on("data", (chunk) => append(run, chunk.toString()));
   child.stderr.on("data", (chunk) => append(run, chunk.toString()));

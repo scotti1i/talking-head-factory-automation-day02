@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { commandOk, localBin, projectRoot, whisperModelPath } from "./lib.mjs";
+import { commandOk, localBin, npmCmd, projectRoot, whisperModelPath } from "./lib.mjs";
 
 // ============================================================
 // 环境体检:分两档
@@ -23,7 +23,7 @@ const HINT = {
 
 console.log("== 核心依赖(缺失即阻断) ==");
 checkNode();
-checkCore("npm", ["--version"], "npm");
+checkCore(npmCmd(), ["--version"], "npm");
 checkCore("ffmpeg", ["-version"], "FFmpeg");
 checkCore("ffprobe", ["-version"], "FFprobe");
 checkHyperframes();

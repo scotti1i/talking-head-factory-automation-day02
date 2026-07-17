@@ -7,6 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  commandOk,
   escapeHtml,
   fmtTime,
   parseArgs,
@@ -34,6 +35,8 @@ if (!fs.existsSync(configPath)) {
 }
 const config = readJson(configPath);
 const theme = loadTheme(args.theme || config.theme);
+// 中文字体子集是否成功产出；决定 @font-face / preload / 字体栈是否引用 FactoryCJK。
+let cjkFontStaged = false;
 const width = Number(config.width || 1080);
 const height = Number(config.height || 1920);
 const format = resolveFormat(config, width, height);
@@ -251,12 +254,32 @@ function stageAssets() {
     path.join(root, "themes", "_shared", "vendor", "gsap.min.js"),
     path.join(jobDir, "vendor", "gsap.min.js")
   );
-  stageCjkSubset();
+  cjkFontStaged = stageCjkSubset();
 }
 
+// 各平台的系统中文字体源；FACTORY_CJK_FONT 环境变量可覆盖。
+function cjkFontSource() {
+  const override = process.env.FACTORY_CJK_FONT;
+  if (override && fs.existsSync(override)) return override;
+  const candidates = [
+    "/System/Library/Fonts/Hiragino Sans GB.ttc", // macOS
+    path.join(process.env.WINDIR || "C:\\Windows", "Fonts", "msyh.ttc"), // Windows 微软雅黑
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc" // Linux Noto
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate)) || null;
+}
+
+// 子集化失败不阻断出片：跳过后字幕回退系统字体渲染，确定性渲染建议装 fonttools。
 function stageCjkSubset() {
-  const source = "/System/Library/Fonts/Hiragino Sans GB.ttc";
-  if (!fs.existsSync(source)) throw new Error(`缺少确定性中文字体源: ${source}`);
+  const source = cjkFontSource();
+  if (!source) {
+    console.warn("WARN 跳过中文字体子集化: 未找到系统中文字体源(可用 FACTORY_CJK_FONT 指定)。字幕将回退系统字体。");
+    return false;
+  }
+  if (!commandOk("pyftsubset", ["--help"]).ok) {
+    console.warn("WARN 跳过中文字体子集化: 缺少 pyftsubset(pip install fonttools)。字幕将回退系统字体。");
+    return false;
+  }
   const textFile = path.join(jobDir, "tmp", "factory-cjk-chars.txt");
   const output = path.join(jobDir, "assets", "fonts", "FactoryCJK.woff2");
   const text = JSON.stringify({ title: config.title, beats, captions, broll, intro });
@@ -272,6 +295,7 @@ function stageCjkSubset() {
     "--layout-features=*",
     "--no-hinting"
   ], { capture: true });
+  return true;
 }
 
 function copyOrLink(src, dest) {
@@ -474,6 +498,7 @@ function fontFaces() {
         `@font-face { font-family: "${font.family}"; src: url("assets/fonts/${font.file}") format("woff2"); font-weight: ${font.weight}; }`
     )
     .join("\n      ");
+  if (!cjkFontStaged) return themed;
   return `@font-face { font-family: "FactoryCJK"; src: url("assets/fonts/FactoryCJK.woff2") format("woff2"); font-weight: 100 900; }\n      ${themed}`;
 }
 
@@ -542,7 +567,7 @@ function deterministicFontStack(stack) {
     .split(",")
     .map((item) => item.trim())
     .filter((item) => item && !banned.test(item));
-  return ["FactoryCJK", ...remaining].join(", ");
+  return (cjkFontStaged ? ["FactoryCJK", ...remaining] : remaining).join(", ");
 }
 
 function layoutCss() {
@@ -656,7 +681,7 @@ function renderHtml() {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="data:," />
-    <link rel="preload" href="assets/fonts/FactoryCJK.woff2" as="font" type="font/woff2" crossorigin />
+    ${cjkFontStaged ? '<link rel="preload" href="assets/fonts/FactoryCJK.woff2" as="font" type="font/woff2" crossorigin />' : ""}
     <title>${escapeHtml(config.title || "口播成片")} - ${escapeHtml(theme.label)}</title>
     <style>
       ${fontFaces()}

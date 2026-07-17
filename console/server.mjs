@@ -20,7 +20,7 @@ import {
 import { buildPrompt } from "./prompts.mjs";
 import { cancelRun, listRuns, startRun, startVisualPreviewRun, streamRun } from "./runner.mjs";
 import { getVisualAsset, listVisualLibrary, resolveVisualPreview } from "./visual-library.mjs";
-import { npmCmd, resolveDownloadsRoot, revealInFileManager } from "../scripts/lib.mjs";
+import { npmCmd, resolveDownloadsRoot, revealInFileManager, spawnShellFix } from "../scripts/lib.mjs";
 
 const PORT = Number(process.env.CONSOLE_PORT || 4870);
 const PUBLIC_DIR = path.join(ROOT, "console", "public");
@@ -99,7 +99,7 @@ async function api(req, res, url) {
     if (!slug) return sendJson(res, 400, { error: "缺 slug" });
     const args = ["run", "new", "--", slug];
     if (body.title) args.push("--title", body.title);
-    const result = spawnSync(npmCmd(), args, { cwd: ROOT, encoding: "utf8" });
+    const result = spawnSync(...spawnShellFix(npmCmd(), args, { cwd: ROOT, encoding: "utf8" }));
     if (result.status !== 0) return sendJson(res, 500, { error: result.stderr || result.stdout });
     if (body.source) importSource(slug, String(body.source));
     return sendJson(res, 200, { job: jobDetail(slug), output: result.stdout });

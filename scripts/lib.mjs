@@ -165,12 +165,25 @@ export function copyDir(src, dest) {
   }
 }
 
+// Windows 上直接 spawn .cmd/.bat 会被 Node 拒绝(EINVAL 安全限制),必须走 shell；
+// 走 shell 时含特殊字符的参数需要加引号。所有 spawn 调用点统一过这一层。
+export function spawnShellFix(command, args, options = {}) {
+  if (!(process.platform === "win32" && /\.(cmd|bat)$/i.test(command))) {
+    return [command, args, options];
+  }
+  const quoted = args.map((a) =>
+    /[\s^&|<>()"]/.test(String(a)) ? `"${String(a).replace(/"/g, '""')}"` : String(a)
+  );
+  return [command, quoted, { ...options, shell: true }];
+}
+
 export function run(command, args, options = {}) {
-  const result = spawnSync(command, args, {
+  const [cmd, argv, opts] = spawnShellFix(command, args, {
     stdio: options.capture ? "pipe" : "inherit",
     encoding: "utf8",
     ...options
   });
+  const result = spawnSync(cmd, argv, opts);
   if (result.status !== 0) {
     const stderr = result.stderr ? `\n${result.stderr}` : "";
     throw new Error(`${command} ${args.join(" ")} failed${stderr}`);
@@ -179,7 +192,8 @@ export function run(command, args, options = {}) {
 }
 
 export function commandOk(command, args = ["--version"]) {
-  const result = spawnSync(command, args, { stdio: "pipe", encoding: "utf8" });
+  const [cmd, argv, opts] = spawnShellFix(command, args, { stdio: "pipe", encoding: "utf8" });
+  const result = spawnSync(cmd, argv, opts);
   return {
     ok: result.status === 0,
     output: `${result.stdout || ""}${result.stderr || ""}`.trim()
