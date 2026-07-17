@@ -68,7 +68,8 @@ function packageForVariant(id, config) {
   const workers = render.workers || 8;
   const bitrate = render.videoBitrate || "24M";
   const output = `renders/${config.outputName || `${id}-60fps.mp4`}`;
-  const cli = "../../../../node_modules/.bin/hyperframes";
+  // 裸名即可：npm run 会把所有祖先目录的 node_modules/.bin 注入 PATH（Windows cmd 不认 POSIX 相对路径）。
+  const cli = "hyperframes";
   return {
     name: `talking-head-${id}`,
     private: true,
