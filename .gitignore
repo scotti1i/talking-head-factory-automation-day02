@@ -1,0 +1,17 @@
+.DS_Store
+node_modules/
+__pycache__/
+.codex_tmp/
+
+# 你的视频 job 整体不进版本管理——转录、字幕、项目意图都是你的私人内容。
+# （上游教训：只挡大文件会让真实转录和发布数据被 git 追踪并随开源包泄漏。）
+jobs/*
+!jobs/.gitkeep
+
+# smoke / 临时交付
+out/
+reports/**/*.mp4
+
+# 系统日志
+npm-debug.log*
+console/logs/

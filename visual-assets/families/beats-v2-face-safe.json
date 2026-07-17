@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "beats-v2-face-safe",
+  "label": "Beats v2 · Face-safe",
+  "kind": "preset",
+  "description": "开源包唯一生产级视觉家族。十种信息组件共享一份数据，在抖音竖屏和 YouTube 横屏中分别重排，人物区始终留底部安全带。",
+  "lifecycle": "published",
+  "compatibility": "supported",
+  "formats": ["vertical", "horizontal"],
+  "sources": [
+    { "path": "scripts/build-beats-composition.mjs", "role": "production-renderer" },
+    { "path": "themes/registry.json", "role": "theme-registry" },
+    { "path": "scripts/create-regression-job.mjs", "role": "regression-generator" }
+  ],
+  "items": [
+    { "id": "statement", "label": "判断金句", "kind": "component" },
+    { "id": "hero", "label": "核心数字", "kind": "component" },
+    { "id": "panel", "label": "要点面板", "kind": "component" },
+    { "id": "chips", "label": "标签组", "kind": "component" },
+    { "id": "split", "label": "双栏对比", "kind": "component" },
+    { "id": "duel", "label": "错与对", "kind": "component" },
+    { "id": "pipeline", "label": "流程链", "kind": "component" },
+    { "id": "trio", "label": "三要素", "kind": "component" },
+    { "id": "diagram", "label": "中心关系图", "kind": "component" },
+    { "id": "cta", "label": "行动收束", "kind": "component" },
+    {
+      "id": "vertical-face-safe",
+      "label": "竖屏人物安全布局",
+      "kind": "layout",
+      "formats": ["vertical"],
+      "preview": { "status": "ready", "format": "vertical", "poster": "themes/warm-glass/preview.jpg" }
+    },
+    {
+      "id": "horizontal-explainer",
+      "label": "横屏左解说右人物布局",
+      "kind": "layout",
+      "formats": ["horizontal"]
+    }
+  ],
+  "migrationCandidates": [],
+  "lineage": {
+    "parents": [],
+    "supersedes": [],
+    "supersededBy": []
+  },
+  "usageMatch": {
+    "componentIds": ["statement", "hero", "panel", "chips", "split", "duel", "pipeline", "trio", "diagram", "cta"]
+  },
+  "apply": {
+    "mode": "preset",
+    "payload": { "preset": "beats-v2-face-safe" }
+  },
+  "preview": {
+    "state": "ready",
+    "poster": "themes/warm-glass/preview.jpg",
+    "format": "vertical",
+    "theme": "warm-glass"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "talking-head-video-factory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Multi-format talking-head workflow with semantic editing, visual components, captions, QA, and delivery.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "doctor": "node scripts/doctor.mjs",
+    "new": "node scripts/new-job.mjs",
+    "inventory": "node scripts/inventory-media.mjs",
+    "transcribe:editor": "node scripts/transcribe-editor.mjs",
+    "captions:build": "node scripts/captions-from-edl.mjs",
+    "status": "node scripts/factory-status.mjs",
+    "legacy:roughcut:silence": "node scripts/create-rough-cut-edl.mjs",
+    "legacy:roughcut:apply": "node scripts/apply-rough-cut-cuts.mjs",
+    "roughcut:render": "node scripts/render-rough-cut-edl.mjs",
+    "qa:cuts": "node scripts/qa-cuts.mjs",
+    "qa:cuts:approve": "node scripts/approve-cut-qa.mjs",
+    "build": "node scripts/build-beats-composition.mjs",
+    "build:beats": "node scripts/build-beats-composition.mjs",
+    "console": "node console/server.mjs",
+    "visual:previews": "node scripts/visual-preview-generate.mjs",
+    "test:visual-library": "node --test console/jobs.test.mjs console/color-system.test.mjs scripts/component-registry.test.mjs scripts/visual-preview-lib.test.mjs visual-assets/catalog.test.mjs",
+    "sample": "node scripts/create-sample-job.mjs",
+    "transcribe": "node scripts/transcribe-editor.mjs",
+    "app": "node -e \"if(process.platform==='darwin'){require('child_process').execFileSync('bash',['scripts/make-app.sh'],{stdio:'inherit'})}else{console.log('make-app.sh 仅 macOS。Windows 请运行: npm run app:win');process.exit(1)}\"",
+    "app:win": "powershell -ExecutionPolicy Bypass -File scripts/make-shortcut.ps1",
+    "build:variants": "node scripts/build-variants.mjs",
+    "check:variants": "node scripts/check-variants.mjs",
+    "render:variants": "node scripts/render-variants.mjs",
+    "deliver:variants": "node scripts/deliver-variants.mjs",
+    "cut:shorts": "node scripts/cut-shorts.mjs",
+    "lint": "hyperframes lint",
+    "validate": "hyperframes validate",
+    "inspect": "hyperframes inspect --samples 20",
+    "check": "npm run lint && npm run validate && npm run inspect",
+    "render:review": "hyperframes render --fps 30 --quality standard --workers 4 --video-bitrate 24M --output renders/review-30fps.mp4",
+    "render:final": "hyperframes render --fps 60 --quality high --workers 8 --video-bitrate 36M --output renders/final-60fps.mp4",
+    "qa": "node scripts/qa-final.mjs",
+    "qa:final:approve": "node scripts/approve-final-qa.mjs",
+    "deliver": "node scripts/deliver.mjs",
+    "smoke": "node scripts/create-smoke-job.mjs && node scripts/build-beats-composition.mjs --job jobs/smoke && cd jobs/smoke && npm run check",
+    "smoke:full": "npm run smoke && cd jobs/smoke && npm run render:final && cd ../.. && npm run qa -- --job jobs/smoke --video jobs/smoke/renders/final-60fps.mp4 && npm run deliver -- --job jobs/smoke --video jobs/smoke/renders/final-60fps.mp4",
+    "smoke:multi": "node scripts/create-smoke-job.mjs && npm run build:variants -- --job jobs/smoke && npm run check:variants -- --job jobs/smoke",
+    "regression": "node scripts/create-regression-job.mjs && npm run build:variants -- --job jobs/regression && npm run check:variants -- --job jobs/regression"
+  },
+  "dependencies": {
+    "hyperframes": "0.5.6"
+  }
+}

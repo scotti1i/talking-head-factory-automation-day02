@@ -1,0 +1,45 @@
+# 双平台门禁：macOS + Windows 真机跑通 doctor、单测与零依赖 smoke 全链。
+# 这是「Windows 支持」的真实证据来源——没有绿的 CI run 不宣称已打通。
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Doctor（core 必须全绿；whisper 属完整管线档，缺失只警告）
+        run: npm run doctor
+
+      - name: Unit tests（组件合同 / 视觉库 / 颜色系统 / jobs）
+        run: npm run test:visual-library
+
+      - name: Smoke（合成素材 → 构建合成 → hyperframes 静态检查，零密钥零真实素材）
+        run: npm run smoke
+
+      - name: Regression（合成回归基线：竖横屏 + 多组件 + 字幕 + B-roll 全链）
+        run: npm run regression

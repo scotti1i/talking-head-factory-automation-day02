@@ -1,0 +1,16 @@
+/* Warm Minimal v1: paper, ink, terracotta; no glass, glow or decorative noise. */
+      #talking-video { filter: none; }
+      #pip-ring { border-color: #BF5700; box-shadow: 0 10px 30px rgba(45, 34, 24, 0.24); }
+      .beat { border-width: 1px; }
+      .beat::before { height: 4px; }
+      .kicker { letter-spacing: 0.12em; text-transform: uppercase; text-shadow: none; }
+      .beat strong { box-shadow: none; }
+      .hero-number { text-shadow: none; }
+      .caption {
+        letter-spacing: 0;
+        padding: 10px 18px 12px;
+        border: 1px solid rgba(255, 249, 240, 0.10);
+        border-radius: 8px;
+        background: #2D2218;
+        box-shadow: 0 8px 24px rgba(22, 14, 8, 0.20);
+      }
