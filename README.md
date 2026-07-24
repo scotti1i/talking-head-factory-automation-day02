@@ -1,7 +1,7 @@
 # 口播工厂 · Talking Head Video Factory
 
-> 「50 天 50 个真实行业 AI 应用」· Day 02 · 创作者服务 · MIT
-> [![ci](https://github.com/scotti1i/talking-head-factory-automation-day02/actions/workflows/ci.yml/badge.svg)](https://github.com/scotti1i/talking-head-factory-automation-day02/actions/workflows/ci.yml)
+> 「50 天 50 个真实行业 AI 应用」· Day 03 · 创作者服务 · MIT
+> [![ci](https://github.com/scotti1i/talking-head-factory-automation-day03/actions/workflows/ci.yml/badge.svg)](https://github.com/scotti1i/talking-head-factory-automation-day03/actions/workflows/ci.yml)
 
 把一条口播原片变成可发布成片的完整流水线：**词级转录 → 语义精剪 → 逐切点 QA → 字幕 → 信息卡包装 → 同一份数据派生竖屏/横屏 → 最终 MP4 QA → Shorts → 交付**。它替代的是剪口播时那套重复劳动——不是替你写内容，而是把"剪、包、检、交"变成可复跑、可检查的确定性工序。
 
